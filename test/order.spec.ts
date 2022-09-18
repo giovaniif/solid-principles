@@ -29,4 +29,23 @@ describe('Order', () => {
     expect(createdOrder.items).toEqual(items)
     expect(createdOrder.customer).toEqual(customer)
   })
+
+  it('should create an order with discount coupon', () => {
+    const cpf = '259.023.510-06'
+    const customer = { cpf }
+    const items = [
+      { description: 'item_1', price: 10, quantity: 10 },
+    ]
+    const discountCoupon = 'my_discount_coupon' 
+    const order = {
+      customer,
+      items,
+      discountCoupon
+    }
+    const totalPriceWithDiscount = 90
+
+    const createdOrder = Order.create(order)
+
+    expect(createdOrder.price).toBe(totalPriceWithDiscount)
+  })
 })
