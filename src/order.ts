@@ -1,51 +1,35 @@
-import { validate } from './cpf-validator'
-
-type Item = { price: number, quantity: number, description: string }
-
-type CreateOrder = {
-  customer: { cpf: string },
-  items: Item[] 
-  discountCoupon?: string
-}
-
-type MyOrder = {
-  customer: { cpf: string },
-  items: Item[] 
-  price: number 
-}
+import { Cpf } from "../src/cpf";
+import { Coupon } from "./coupon";
+import { Item } from "./item";
+import { OrderItem } from "./order-item";
 
 export class Order {
-  public readonly items: Item[]
-  public readonly customer: { cpf: string }
-  public readonly price: number
-
-  private constructor (order: MyOrder) {
-    this.items = order.items
-    this.customer = order.customer
-    this.price = order.price
-    Object.freeze(this)
+  cpf: Cpf 
+  orderItems: OrderItem[]
+  coupon?: Coupon
+  
+  constructor (cpf: string) {
+    this.cpf = new Cpf(cpf)
+    this.orderItems = []
   }
 
+  addItem (orderItem: Item, quantity: number) {
+    this.orderItems.push(new OrderItem(orderItem.idItem, orderItem.price, quantity))
+  }
 
-  static create ({ customer, items, discountCoupon }: CreateOrder): Order {
-    if (!validate(customer.cpf)) {
-      throw new Error('invalid cpf')
-    }
-    const itemsPriceWithoutDiscount = items.reduce((price, item) => {
-      const itemPrice = item.quantity * item.price
-      price += itemPrice
-      return price
+  addCoupon (coupon: Coupon) {
+    this.coupon = coupon
+  }
+
+  getTotal () {
+    let total = this.orderItems.reduce((total, orderItem) => {
+      total += orderItem.getTotal()
+      return total
     }, 0)
-    if (discountCoupon) {
-      const discountPercentage = Order.getCouponDiscountPercentage(discountCoupon)
-      const discount = (itemsPriceWithoutDiscount * discountPercentage) / 100
-      const priceWithDiscount = itemsPriceWithoutDiscount - discount
-      return new Order({ customer, items, price: priceWithDiscount })
+    if (this.coupon) {
+      total -= this.coupon.calculateDiscount(total)
     }
-    return new Order({ customer, items, price: itemsPriceWithoutDiscount })
+    return total
   }
 
-  private static getCouponDiscountPercentage (discountCoupon: string): number {
-    return 10
-  }
 }
