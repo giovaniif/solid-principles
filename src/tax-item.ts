@@ -1,5 +1,9 @@
 import { Item } from "./item";
 
 export abstract class TaxItem extends Item {
-  abstract calculateTax (): number
+  calculateTax (): number {
+    return this.price * this.getTax()
+  }
+
+  abstract getTax (): number
 }

@@ -5,7 +5,7 @@ export class Gin extends TaxItem {
     super("Gin", description, price)
   }
 
-  calculateTax(): number {
-    return this.price * 0.2
+  getTax (): number {
+    return 0.2
   }
 }
